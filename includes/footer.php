@@ -7,9 +7,9 @@
       </div>
       <div class="footer-links">
         <h5>Quick Links</h5>
-        <a href="how-it-works.php">How It Works</a>
-        <a href="competitions.php">Competitions</a>
-        <a href="achievers.php">Leaderboard</a>
+        <a href="<?php echo BASE_URL; ?>/how-it-works.php">How It Works</a>
+        <a href="<?php echo BASE_URL; ?>/competitions.php">Competitions</a>
+        <a href="<?php echo BASE_URL; ?>/achievers.php">Leaderboard</a>
       </div>
       <div class="footer-links">
         <h5>Follow Us</h5>
@@ -19,9 +19,9 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2026 UIU Talent Hunter. Made with ❤️ for UIU students.</p>
-    </div></footer>
-  
+      <p>&copy; 2026 UIU Talent Hunter. Made with ❤️ for UIU students.</p>
+    </div>
+</footer>
 
   <!-- ========== UPLOAD MODAL ========== -->
   <div class="modal-overlay hidden" id="upload-modal">
@@ -68,5 +68,4 @@
   </div>
 
   <!-- ========== TOAST ========== -->
-  
   <div class="toast hidden" id="toast"></div>

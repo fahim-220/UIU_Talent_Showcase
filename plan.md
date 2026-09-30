@@ -89,7 +89,8 @@ UIU_Talent_Showcase/
 │   │       ├── video.css
 │   │       ├── blog.css
 │   │       ├── competitions.css
-│   │       └── how-it-works.css
+│   │       ├── how-it-works.css
+      └── auth.css
 │   ├── js/
 │   │   ├── main.js            # menu, modals, toast, like, comment, filters
 │   │   ├── dashboard.js
@@ -142,6 +143,8 @@ Rules:
 ## 4. Phases
 
 ### Phase 1 - Setup and cleanup
+**Status:** Done
+
 **Tasks**
 - Move the project into `C:\xampp\htdocs\UIU_Talent_Showcase`.
 - Create the folder structure from section 2.
