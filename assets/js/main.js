@@ -2,29 +2,6 @@
    UIU TALENT SHOW — SCRIPT
    ======================================== */
 
-// ---- Tab switching ----
-function showTab(tab) {
-  // Hide all sections
-  document.querySelectorAll('.content-section').forEach(s => {
-    s.classList.add('hidden-tab');
-    s.classList.remove('active-tab');
-  });
-
-  // Show target section
-  const target = document.getElementById(tab);
-  if (target) {
-    target.classList.remove('hidden-tab');
-    target.classList.add('active-tab');
-  }
-
-  // Update tab buttons
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-
-  // Smooth scroll to content
-  document.getElementById('content-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 // ---- Like toggle ----
 function likePost(btn) {
   const countEl = btn.querySelector('span');
@@ -126,14 +103,18 @@ function escapeHtml(str) {
 // ---- Modal ----
 function openModal(id) {
   const modal = document.getElementById(id);
+  if (!modal) {
+    console.warn("Modal not found: " + id);
+    return;
+  }
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
-
-  if (id === 'admin-modal') populateAdminPanel();
 }
 
 function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('hidden');
   document.body.style.overflow = '';
 }
 
@@ -178,95 +159,11 @@ function submitEntry() {
   });
 }
 
-// ---- Admin login ----
-const ADMIN_CREDENTIALS = { user: 'admin', pass: 'uiu2026' };
-let adminLoggedIn = false;
-
-function adminLogin() {
-  const user = document.getElementById('admin-user').value.trim();
-  const pass = document.getElementById('admin-pass').value;
-
-  if (user === ADMIN_CREDENTIALS.user && pass === ADMIN_CREDENTIALS.pass) {
-    adminLoggedIn = true;
-    document.getElementById('admin-login-view').classList.add('hidden');
-    document.getElementById('admin-panel-view').classList.remove('hidden');
-    showToast('✅ Admin logged in!');
-  } else {
-    showToast('❌ Invalid credentials', 'error');
-  }
-}
-
-function adminLogout() {
-  adminLoggedIn = false;
-  document.getElementById('admin-login-view').classList.remove('hidden');
-  document.getElementById('admin-panel-view').classList.add('hidden');
-  document.getElementById('admin-user').value = '';
-  document.getElementById('admin-pass').value = '';
-  closeModal('admin-modal');
-}
-
-// ---- Admin leaderboard data ----
-const participants = [
-  { id: 'omar', name: 'Omar Faruq', avatar: 'https://i.pravatar.cc/28?img=40', cat: 'Blog', pts: 113 },
-  { id: 'priya', name: 'Priya Sharma', avatar: 'https://i.pravatar.cc/28?img=12', cat: 'Audio', pts: 72 },
-  { id: 'nusrat', name: 'Nusrat Jahan', avatar: 'https://i.pravatar.cc/28?img=33', cat: 'Blog', pts: 98 },
-  { id: 'sabrina', name: 'Sabrina Islam', avatar: 'https://i.pravatar.cc/28?img=25', cat: 'Audio', pts: 91 },
-  { id: 'mehedi', name: 'Mehedi Khan', avatar: 'https://i.pravatar.cc/28?img=9', cat: 'Video', pts: 65 },
-  { id: 'zara', name: 'Zara Ahmed', avatar: 'https://i.pravatar.cc/28?img=45', cat: 'Blog', pts: 84 },
-  { id: 'tanvir', name: 'Tanvir Hossain', avatar: 'https://i.pravatar.cc/28?img=5', cat: 'Video', pts: 56 },
-  { id: 'farhan', name: 'Farhan Uddin', avatar: 'https://i.pravatar.cc/28?img=20', cat: 'Audio', pts: 46 },
-  { id: 'ayesha', name: 'Ayesha Rahman', avatar: 'https://i.pravatar.cc/28?img=1', cat: 'Video', pts: 53 },
-];
-
-function populateAdminPanel() {
-  const list = document.getElementById('admin-point-list');
-  list.innerHTML = '';
-
-  participants.forEach(p => {
-    const row = document.createElement('div');
-    row.className = 'admin-point-row';
-    row.innerHTML = `
-      <img src="${p.avatar}" alt="${p.name}" />
-      <span class="p-name">${p.name}</span>
-      <span class="cat-pill ${p.cat.toLowerCase()}-pill" style="font-size:0.72rem">${p.cat}</span>
-      <input type="number" class="point-input" id="pt-${p.id}" value="${p.pts}" min="0" max="500" />
-    `;
-    list.appendChild(row);
-  });
-}
-
-function saveAdminPoints() {
-  participants.forEach(p => {
-    const input = document.getElementById('pt-' + p.id);
-    if (input) {
-      const newPts = parseInt(input.value) || 0;
-      p.pts = newPts;
-
-      // Update displayed admin pts in table
-      const el = document.getElementById('ap-' + p.id);
-      if (el) el.textContent = newPts;
-
-      // Recalculate total (likes + comments + admin pts) — approximate
-      const row = el ? el.closest('tr') : null;
-      if (row) {
-        const cells = row.querySelectorAll('td');
-        const likes = parseInt(cells[3]?.textContent) || 0;
-        const comments = parseInt(cells[4]?.textContent) || 0;
-        const total = Math.round(likes + comments * 0.5 + newPts);
-        const totalEl = row.querySelector('.total-pts');
-        if (totalEl) totalEl.textContent = total;
-      }
-    }
-  });
-
-  closeModal('admin-modal');
-  showToast('🏆 Leaderboard updated!');
-}
-
 // ---- Toast ----
 let toastTimer;
 function showToast(msg, type = 'success') {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   toast.textContent = msg;
   toast.className = 'toast';
   toast.classList.add('type-' + type);
