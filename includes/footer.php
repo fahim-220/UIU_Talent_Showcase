@@ -31,38 +31,42 @@
         <button aria-label="Close" class="modal-close" onclick="closeModal('upload-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Your Name</label>
-          <input type="text" class="form-input" placeholder="Enter your full name" />
-        </div>
-        <div class="form-group">
-          <label>Entry Category</label>
-          <div class="category-select">
-            <button class="cat-option active" onclick="selectCat(this,'video')"><i class="fas fa-video"></i> Video</button>
-            <button class="cat-option" onclick="selectCat(this,'audio')"><i class="fas fa-music"></i> Audio</button>
-            <button class="cat-option" onclick="selectCat(this,'blog')"><i class="fas fa-pen-nib"></i> Blog</button>
+        <form id="upload-form">
+          <input type="hidden" name="type" id="upload-type" value="video" />
+          <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>" />
+          <div class="form-group">
+            <label>Entry Category</label>
+            <div class="category-select">
+              <button type="button" class="cat-option active" onclick="selectCat(this,'video')"><i class="fas fa-video"></i> Video</button>
+              <button type="button" class="cat-option" onclick="selectCat(this,'audio')"><i class="fas fa-music"></i> Audio</button>
+              <button type="button" class="cat-option" onclick="selectCat(this,'text')"><i class="fas fa-pen-nib"></i> Blog (Text)</button>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label>Title</label>
-          <input type="text" class="form-input" placeholder="Give your entry a title" />
-        </div>
-        <div class="form-group" id="upload-file-group">
-          <label>Upload File</label>
-          <div class="file-drop" onclick="document.getElementById('file-input').click()">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Click to upload or drag & drop</p>
-            <span>Video: MP4, MOV | Audio: MP3, WAV | Images: JPG, PNG</span>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" id="upload-title" class="form-input" placeholder="Give your entry a title" required maxlength="150" />
           </div>
-          <input type="file" id="file-input" class="hidden" multiple />
-        </div>
-        <div class="form-group">
-          <label>Description</label>
-          <textarea class="form-input" rows="4" placeholder="Tell us about your entry..."></textarea>
-        </div>
-        <button class="btn-submit" onclick="submitEntry()">
-          <i class="fas fa-paper-plane"></i> Submit Entry
-        </button>
+          <div class="form-group" id="upload-file-group">
+            <label>Upload File</label>
+            <div class="file-drop" onclick="document.getElementById('file-input').click()">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Click to upload or drag & drop</p>
+              <span id="upload-file-hint">Video: MP4, WEBM</span>
+            </div>
+            <input type="file" id="file-input" name="file" class="hidden" accept=".mp4,.webm" />
+          </div>
+          <div class="form-group hidden" id="upload-cover-group">
+            <label>Cover Image (Optional)</label>
+            <input type="file" id="cover-input" name="cover_image" class="form-input" accept=".jpg,.jpeg,.png,.webp" />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" id="upload-description" class="form-input" rows="4" placeholder="Tell us about your entry..."></textarea>
+          </div>
+          <button type="button" class="btn-submit" id="upload-submit-btn" onclick="submitEntry()">
+            <i class="fas fa-paper-plane"></i> Submit Entry
+          </button>
+        </form>
       </div>
     </div>
   </div>

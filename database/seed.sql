@@ -10,3 +10,8 @@ INSERT INTO users (name, email, password_hash, role, department, bio, avatar) VA
 ('Mehedi Khan', 'mehedi@uiu.ac.bd', '$2y$10$Q0FBSU8MrV0AAEnnCuDEFOFMsFnzf0dStDdy6jQ.LRpNs04EfBk/q', 'user', 'EEE', 'Cinematography enthusiast.', 'https://i.pravatar.cc/150?img=9'),
 ('Zara Ahmed', 'zara@uiu.ac.bd', '$2y$10$Q0FBSU8MrV0AAEnnCuDEFOFMsFnzf0dStDdy6jQ.LRpNs04EfBk/q', 'user', 'English', 'Creative writer and poet.', 'https://i.pravatar.cc/150?img=45'),
 ('Tanvir Hossain', 'tanvir@uiu.ac.bd', '$2y$10$Q0FBSU8MrV0AAEnnCuDEFOFMsFnzf0dStDdy6jQ.LRpNs04EfBk/q', 'user', 'CSE', 'Video editor and animator.', 'https://i.pravatar.cc/150?img=5');
+
+INSERT INTO posts (user_id, type, title, description, file_path, cover_image) VALUES
+(2, 'text', 'My Journey into Tech', 'Programming changed the way I see the world. It started with simple logic puzzles and grew into building web applications that solve real-world problems.', '', NULL),
+(5, 'text', 'The Art of Poetry', 'Words flow like a river when you let your emotions guide the pen. Here is a short reflection on how writing heals the soul.', '', NULL),
+(3, 'text', 'Finding Rhythm', 'Music is not just about playing the right notes, it is about feeling the space between them.', '', NULL);

@@ -162,6 +162,7 @@ Rules:
 - Look and layout match the original.
 
 ### Phase 2 - Database and authentication
+**Status:** Done
 **Tasks**
 - Write `database/schema.sql` and `database/seed.sql`.
 - Write `includes/config.php`, `db.php`, `auth.php`, `functions.php`.

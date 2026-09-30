@@ -136,27 +136,89 @@ document.addEventListener('keydown', (e) => {
 function selectCat(btn, cat) {
   document.querySelectorAll('.cat-option').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  
+  document.getElementById('upload-type').value = cat;
+  const fileGroup = document.getElementById('upload-file-group');
+  const coverGroup = document.getElementById('upload-cover-group');
+  const hint = document.getElementById('upload-file-hint');
+  const fileInput = document.getElementById('file-input');
+  
+  if (cat === 'video') {
+    fileGroup.classList.remove('hidden');
+    coverGroup.classList.add('hidden');
+    hint.textContent = 'Video: MP4, WEBM (Max 100MB)';
+    fileInput.accept = '.mp4,.webm';
+  } else if (cat === 'audio') {
+    fileGroup.classList.remove('hidden');
+    coverGroup.classList.add('hidden');
+    hint.textContent = 'Audio: MP3, WAV, OGG, M4A (Max 20MB)';
+    fileInput.accept = '.mp3,.wav,.ogg,.m4a';
+  } else if (cat === 'text') {
+    fileGroup.classList.add('hidden');
+    coverGroup.classList.remove('hidden');
+  }
 }
 
 // ---- Submit entry ----
-function submitEntry() {
-  const nameInput = document.querySelector('#upload-modal .form-input');
-  const name = nameInput.value.trim();
-
-  if (!name) {
-    showToast('⚠️ Please enter your name', 'warn');
-    nameInput.focus();
+async function submitEntry() {
+  const form = document.getElementById('upload-form');
+  if (!form) return;
+  
+  const title = document.getElementById('upload-title').value.trim();
+  const desc = document.getElementById('upload-description').value.trim();
+  const type = document.getElementById('upload-type').value;
+  const fileInput = document.getElementById('file-input');
+  
+  if (!title) {
+    showToast('⚠️ Title is required.', 'warn');
     return;
   }
-
-  closeModal('upload-modal');
-  showToast('🎉 Entry submitted! Awaiting review.');
-
-  // Reset form
-  document.querySelectorAll('#upload-modal .form-input').forEach(i => i.value = '');
-  document.querySelectorAll('#upload-modal .cat-option').forEach((b, idx) => {
-    b.classList.toggle('active', idx === 0);
-  });
+  if (type === 'text' && !desc) {
+    showToast('⚠️ Description is required for text posts.', 'warn');
+    return;
+  }
+  if ((type === 'video' || type === 'audio') && fileInput.files.length === 0) {
+    showToast('⚠️ File is required.', 'warn');
+    return;
+  }
+  
+  const btn = document.getElementById('upload-submit-btn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+  btn.disabled = true;
+  
+  const formData = new FormData(form);
+  
+  try {
+    const res = await fetch('api/upload.php', {
+      method: 'POST',
+      body: formData
+    });
+    
+    let result;
+    try {
+      result = await res.json();
+    } catch (e) {
+      result = { success: false, message: 'Server returned an invalid response.' };
+    }
+    
+    if (result.success) {
+      showToast('🎉 ' + result.message);
+      form.reset();
+      if (result.redirect) {
+        window.location.href = result.redirect;
+      } else {
+        closeModal('upload-modal');
+      }
+    } else {
+      showToast('❌ ' + result.message, 'error');
+    }
+  } catch (err) {
+    showToast('❌ Network error occurred.', 'error');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
 }
 
 // ---- Toast ----

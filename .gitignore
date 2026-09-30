@@ -1,0 +1,7 @@
+/uploads/video/*
+!/uploads/video/.gitkeep
+/uploads/audio/*
+!/uploads/audio/.gitkeep
+/uploads/images/*
+!/uploads/images/.gitkeep
+!/uploads/.htaccess

@@ -29,7 +29,11 @@
       </div>
       <div class="hero-btns">
         <a href="#competitions" class="btn-primary">Explore Opportunities</a>
-        <button class="btn-secondary" onclick="openModal('upload-modal')">Submit Your Entry</button>
+        <?php if (is_logged_in()): ?>
+          <button class="btn-secondary" onclick="openModal('upload-modal')">Submit Your Entry</button>
+        <?php else: ?>
+          <a href="<?php echo BASE_URL; ?>/login.php" class="btn-secondary" style="text-decoration:none; display: inline-block;">Submit Your Entry</a>
+        <?php endif; ?>
       </div>
     </div>
     <div class="hero-cards">

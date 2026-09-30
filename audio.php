@@ -1,19 +1,95 @@
-<?php require_once 'includes/auth.php'; ?>
+<?php
+require_once 'includes/auth.php';
+
+$stmt = $pdo->prepare("
+    SELECT p.*, u.name as author_name, u.avatar,
+           (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
+           (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count,
+           (SELECT COALESCE(SUM(points), 0) FROM points WHERE user_id = p.user_id) as total_points
+    FROM posts p
+    JOIN users u ON p.user_id = u.id
+    WHERE p.type = 'audio'
+    ORDER BY p.created_at DESC
+");
+$stmt->execute();
+$posts = $stmt->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Audio Entries | UIU Talent Show</title>
-  <link rel="stylesheet" href="assets/css/style.css" /><link rel="stylesheet" href="assets/css/pages/audio.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css" />
+  <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/pages/audio.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body class="category-page audio-page">
   <?php include "includes/header.php"; ?>
-  <main class="category-main"><div class="page-heading"><p class="hero-badge"><i class="fas fa-music"></i> Creative showcase</p><h1>Audio Entries</h1><p>Student singers, musicians and composers sharing their sound with UIU.</p></div><section class="content-section active-tab"><div class="cards-grid">
-    <article class="media-card audio-card"><div class="audio-visual"><div class="audio-avatar"><img src="https://i.pravatar.cc/80?img=12" alt="Priya Sharma" /></div><div class="audio-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><span class="cat-badge audio-badge"><i class="fas fa-music"></i> Audio</span></div><div class="card-body"><h3 class="card-title">Ekla Cholo Re (Cover)</h3><div class="card-meta"><img src="https://i.pravatar.cc/30?img=12" class="avatar" alt="Priya Sharma" /><span class="author">Priya Sharma</span><span class="dot">•</span><span class="date">Sep 1, 2026</span></div><div class="audio-player"><audio controls><source src="#" type="audio/mpeg" /></audio></div><p class="card-desc">A heartfelt rendition of Tagore's classic, recorded in a home studio with acoustic guitar.</p><div class="card-footer"><div class="reactions"><button aria-label="React" class="react-btn like-btn" onclick="likePost(this)"><i class="far fa-heart"></i> <span>62</span></button><button aria-label="React" class="react-btn comment-btn" onclick="openComments(this)"><i class="far fa-comment"></i> <span>21</span></button></div><div class="points-badge"><i class="fas fa-star"></i> <span>155</span> pts</div></div><div class="comments-panel hidden"><div class="comment-list"></div><div class="comment-input-row"><input class="comment-input" placeholder="Add a comment..." /><button aria-label="Send" class="send-btn" onclick="addComment(this)"><i class="fas fa-paper-plane"></i></button></div></div></div></article>
-    <article class="media-card audio-card"><div class="audio-visual"><div class="audio-avatar"><img src="https://i.pravatar.cc/80?img=20" alt="Farhan Uddin" /></div><div class="audio-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><span class="cat-badge audio-badge"><i class="fas fa-music"></i> Audio</span></div><div class="card-body"><h3 class="card-title">Original Composition - Dawn</h3><div class="card-meta"><img src="https://i.pravatar.cc/30?img=20" class="avatar" alt="Farhan Uddin" /><span class="author">Farhan Uddin</span><span class="dot">•</span><span class="date">Sep 2, 2026</span></div><div class="audio-player"><audio controls><source src="#" type="audio/mpeg" /></audio></div><p class="card-desc">An original lo-fi track produced entirely on a laptop, inspired by early morning walks on campus.</p><div class="card-footer"><div class="reactions"><button aria-label="React" class="react-btn like-btn" onclick="likePost(this)"><i class="far fa-heart"></i> <span>38</span></button><button aria-label="React" class="react-btn comment-btn" onclick="openComments(this)"><i class="far fa-comment"></i> <span>11</span></button></div><div class="points-badge"><i class="fas fa-star"></i> <span>95</span> pts</div></div><div class="comments-panel hidden"><div class="comment-list"></div><div class="comment-input-row"><input class="comment-input" placeholder="Add a comment..." /><button aria-label="Send" class="send-btn" onclick="addComment(this)"><i class="fas fa-paper-plane"></i></button></div></div></div></article>
-    <article class="media-card audio-card"><div class="audio-visual"><div class="audio-avatar"><img src="https://i.pravatar.cc/80?img=25" alt="Sabrina Islam" /></div><div class="audio-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><span class="cat-badge audio-badge"><i class="fas fa-music"></i> Audio</span></div><div class="card-body"><h3 class="card-title">Amar Sonar Bangla (Flute)</h3><div class="card-meta"><img src="https://i.pravatar.cc/30?img=25" class="avatar" alt="Sabrina Islam" /><span class="author">Sabrina Islam</span><span class="dot">•</span><span class="date">Sep 3, 2026</span></div><div class="audio-player"><audio controls><source src="#" type="audio/mpeg" /></audio></div><p class="card-desc">A serene flute instrumental of Bangladesh's national anthem, performed and recorded live.</p><div class="card-footer"><div class="reactions"><button aria-label="React" class="react-btn like-btn" onclick="likePost(this)"><i class="far fa-heart"></i> <span>79</span></button><button aria-label="React" class="react-btn comment-btn" onclick="openComments(this)"><i class="far fa-comment"></i> <span>30</span></button></div><div class="points-badge"><i class="fas fa-star"></i> <span>200</span> pts</div></div><div class="comments-panel hidden"><div class="comment-list"></div><div class="comment-input-row"><input class="comment-input" placeholder="Add a comment..." /><button aria-label="Send" class="send-btn" onclick="addComment(this)"><i class="fas fa-paper-plane"></i></button></div></div></div></article>
-  </div></section></main>
-  <?php include "includes/footer.php"; ?><script src="assets/js/main.js"></script>
+
+  <main class="category-main">
+    <div class="page-heading">
+      <p class="hero-badge"><i class="fas fa-music"></i> Creative showcase</p>
+      <h1>Audio Entries</h1>
+      <p>Original music, podcasts, beatboxing, and vocal performances.</p>
+    </div>
+    <section class="content-section active-tab">
+      <div class="cards-grid">
+        <?php if (count($posts) === 0): ?>
+          <div style="text-align: center; width: 100%; grid-column: 1 / -1; padding: 40px 0;">
+            <p style="color: var(--text3); font-size: 1.1rem;">No audio entries yet.</p>
+            <p style="margin-top: 10px;">Be the first! <a href="<?php echo is_logged_in() ? '#' : BASE_URL.'/login.php'; ?>" onclick="<?php echo is_logged_in() ? "openModal('upload-modal'); return false;" : ""; ?>" style="color: var(--accent); text-decoration: none;">Post audio</a></p>
+          </div>
+        <?php else: ?>
+          <?php foreach ($posts as $post): ?>
+            <article class="media-card">
+              <div class="card-thumbnail audio-thumb">
+                <i class="fas fa-headphones-alt"></i>
+                <span class="cat-badge audio-badge"><i class="fas fa-music"></i> Audio</span>
+              </div>
+              <div class="card-body">
+                <h3 class="card-title"><?php echo e($post['title']); ?></h3>
+                <div class="card-meta">
+                  <?php if ($post['avatar']): ?>
+                    <img src="<?php echo e($post['avatar']); ?>" class="avatar" alt="<?php echo e($post['author_name']); ?>" />
+                  <?php else: ?>
+                    <div class="avatar" style="background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;"><?php echo e(strtoupper(substr($post['author_name'], 0, 1))); ?></div>
+                  <?php endif; ?>
+                  <span class="author"><?php echo e($post['author_name']); ?></span>
+                  <span class="dot">&bull;</span>
+                  <span class="date"><?php echo date('M j, Y', strtotime($post['created_at'])); ?></span>
+                </div>
+                <div class="audio-player">
+                  <audio controls>
+                    <source src="<?php echo BASE_URL . '/' . e($post['file_path']); ?>" type="audio/mpeg" />
+                  </audio>
+                </div>
+                <?php if ($post['description']): ?>
+                  <p class="card-desc"><?php echo nl2br(e($post['description'])); ?></p>
+                <?php endif; ?>
+                <div class="card-footer">
+                  <div class="reactions">
+                    <button aria-label="React" class="react-btn like-btn" onclick="likePost(this)"><i class="far fa-heart"></i> <span><?php echo $post['like_count']; ?></span></button>
+                    <button aria-label="React" class="react-btn comment-btn" onclick="openComments(this)"><i class="far fa-comment"></i> <span><?php echo $post['comment_count']; ?></span></button>
+                  </div>
+                  <div class="points-badge"><i class="fas fa-star"></i> <span><?php echo $post['total_points']; ?></span> pts</div>
+                </div>
+                <div class="comments-panel hidden">
+                  <div class="comment-list"></div>
+                  <div class="comment-input-row">
+                    <input class="comment-input" placeholder="Add a comment..." />
+                    <button aria-label="Send" class="send-btn" onclick="addComment(this)"><i class="fas fa-paper-plane"></i></button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+    </section>
+  </main>
+  <?php include "includes/footer.php"; ?>
+  <script src="<?php echo BASE_URL; ?>/assets/js/main.js"></script>
 </body>
 </html>
