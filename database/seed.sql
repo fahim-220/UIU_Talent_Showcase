@@ -15,3 +15,14 @@ INSERT INTO posts (user_id, type, title, description, file_path, cover_image) VA
 (2, 'text', 'My Journey into Tech', 'Programming changed the way I see the world. It started with simple logic puzzles and grew into building web applications that solve real-world problems.', '', NULL),
 (5, 'text', 'The Art of Poetry', 'Words flow like a river when you let your emotions guide the pen. Here is a short reflection on how writing heals the soul.', '', NULL),
 (3, 'text', 'Finding Rhythm', 'Music is not just about playing the right notes, it is about feeling the space between them.', '', NULL);
+
+INSERT IGNORE INTO likes (post_id, user_id) VALUES
+(1, 1), (1, 3), (1, 5),
+(2, 2), (2, 4),
+(3, 1), (3, 6);
+
+INSERT INTO comments (post_id, user_id, body) VALUES
+(1, 3, 'This is really inspiring! I want to learn more.'),
+(1, 5, 'Great read. Thanks for sharing your journey.'),
+(2, 2, 'Poetry is indeed the language of the soul.'),
+(3, 4, 'Very well said! Music connects us all.');

@@ -73,3 +73,8 @@
 
   <!-- ========== TOAST ========== -->
   <div class="toast hidden" id="toast"></div>
+  <script>
+    window.csrfToken = "<?php echo e(csrf_token()); ?>";
+    window.isLoggedIn = <?php echo is_logged_in() ? 'true' : 'false'; ?>;
+    window.loginUrl = "<?php echo BASE_URL; ?>/login.php";
+  </script>

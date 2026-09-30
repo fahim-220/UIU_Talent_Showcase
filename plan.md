@@ -177,6 +177,7 @@ Rules:
 - Visiting `admin/` as a normal user redirects away.
 
 ### Phase 3 - Posts (upload and display)
+**Status:** Done
 **Tasks**
 - Wire the upload modal to `api/upload.php`.
 - Validate file type (by extension and MIME), size, and title. Save with a random filename into `uploads/video|audio|images/`.

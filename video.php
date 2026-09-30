@@ -8,13 +8,43 @@ $stmt = $pdo->prepare("
            (SELECT COALESCE(SUM(points), 0) FROM points WHERE user_id = p.user_id) as total_points
     FROM posts p
     JOIN users u ON p.user_id = u.id
-    WHERE p.type = 'video'
+    WHERE p.type = ?
     ORDER BY p.created_at DESC
 ");
-$stmt->execute();
+$stmt->execute(['video']);
 $posts = $stmt->fetchAll();
-?>
-<!DOCTYPE html>
+
+$liked_posts = [];
+$comments_by_post = [];
+
+if (count($posts) > 0) {
+    $post_ids = array_column($posts, 'id');
+    $in_clause = str_repeat('?,', count($post_ids) - 1) . '?';
+
+    // 1. Get likes for current user
+    if (is_logged_in()) {
+        $l_stmt = $pdo->prepare("SELECT post_id FROM likes WHERE user_id = ? AND post_id IN ($in_clause)");
+        $params = array_merge([$_SESSION['user_id']], $post_ids);
+        $l_stmt->execute($params);
+        $liked_posts = $l_stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    // 2. Get comments
+    $c_stmt = $pdo->prepare("
+        SELECT c.*, u.name as author_name, u.avatar
+        FROM comments c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.post_id IN ($in_clause)
+        ORDER BY c.created_at ASC
+    ");
+    $c_stmt->execute($post_ids);
+    $all_comments = $c_stmt->fetchAll();
+    
+    foreach ($all_comments as $c) {
+        $comments_by_post[$c['post_id']][] = $c;
+    }
+}
+?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -43,6 +73,7 @@ $posts = $stmt->fetchAll();
           </div>
         <?php else: ?>
           <?php foreach ($posts as $post): ?>
+            <?php $is_liked = in_array($post['id'], $liked_posts); ?>
             <article class="media-card">
               <div class="card-thumbnail">
                 <video controls>
@@ -67,16 +98,34 @@ $posts = $stmt->fetchAll();
                 <?php endif; ?>
                 <div class="card-footer">
                   <div class="reactions">
-                    <button aria-label="React" class="react-btn like-btn" onclick="likePost(this)"><i class="far fa-heart"></i> <span><?php echo $post['like_count']; ?></span></button>
-                    <button aria-label="React" class="react-btn comment-btn" onclick="openComments(this)"><i class="far fa-comment"></i> <span><?php echo $post['comment_count']; ?></span></button>
+                    <button aria-label="React" class="react-btn like-btn <?php echo $is_liked ? 'liked' : ''; ?>" data-id="<?php echo $post['id']; ?>" onclick="likePost(this)">
+                      <i class="<?php echo $is_liked ? 'fas fa-heart' : 'far fa-heart'; ?>"></i> <span><?php echo $post['like_count']; ?></span>
+                    </button>
+                    <button aria-label="React" class="react-btn comment-btn" onclick="openComments(this)"><i class="far fa-comment"></i> <span class="comment-count-text"><?php echo $post['comment_count']; ?></span></button>
                   </div>
                   <div class="points-badge"><i class="fas fa-star"></i> <span><?php echo $post['total_points']; ?></span> pts</div>
                 </div>
                 <div class="comments-panel hidden">
-                  <div class="comment-list"></div>
+                  <div class="comment-list">
+                    <?php if (isset($comments_by_post[$post['id']])): ?>
+                      <?php foreach ($comments_by_post[$post['id']] as $c): ?>
+                        <div class="comment">
+                          <?php if ($c['avatar']): ?>
+                            <img src="<?php echo e($c['avatar']); ?>" class="c-avatar" alt="<?php echo e($c['author_name']); ?>" />
+                          <?php else: ?>
+                            <div class="c-avatar" style="background: var(--accent2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; width: 24px; height: 24px; border-radius: 50%;"><?php echo e(strtoupper(substr($c['author_name'], 0, 1))); ?></div>
+                          <?php endif; ?>
+                          <div>
+                            <strong><?php echo e($c['author_name']); ?></strong>
+                            <p><?php echo nl2br(e($c['body'])); ?></p>
+                          </div>
+                        </div>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                  </div>
                   <div class="comment-input-row">
                     <input class="comment-input" placeholder="Add a comment..." />
-                    <button aria-label="Send" class="send-btn" onclick="addComment(this)"><i class="fas fa-paper-plane"></i></button>
+                    <button aria-label="Send" class="send-btn" data-id="<?php echo $post['id']; ?>" onclick="addComment(this)"><i class="fas fa-paper-plane"></i></button>
                   </div>
                 </div>
               </div>

@@ -3,19 +3,58 @@
    ======================================== */
 
 // ---- Like toggle ----
-function likePost(btn) {
-  const countEl = btn.querySelector('span');
-  let count = parseInt(countEl.textContent);
+async function likePost(btn) {
+  if (!window.isLoggedIn) {
+    showToast('⚠️ Please log in to like', 'warn');
+    setTimeout(() => window.location.href = window.loginUrl, 1500);
+    return;
+  }
 
-  if (btn.classList.contains('liked')) {
-    btn.classList.remove('liked');
-    btn.querySelector('i').className = 'far fa-heart';
-    countEl.textContent = count - 1;
-  } else {
-    btn.classList.add('liked');
-    btn.querySelector('i').className = 'fas fa-heart';
-    countEl.textContent = count + 1;
-    createHeartParticle(btn);
+  const postId = btn.getAttribute('data-id');
+  if (!postId) return;
+
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('api/like.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: postId, csrf_token: window.csrfToken })
+    });
+    
+    let result;
+    try {
+      result = await res.json();
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Unexpected server response', 'error');
+      return;
+    }
+    
+    if (result.success) {
+      const countEl = btn.querySelector('span');
+      const icon = btn.querySelector('i');
+      
+      if (countEl) countEl.textContent = result.count;
+      if (result.liked) {
+        btn.classList.add('liked');
+        if (icon) icon.className = 'fas fa-heart';
+        createHeartParticle(btn);
+      } else {
+        btn.classList.remove('liked');
+        if (icon) icon.className = 'far fa-heart';
+      }
+    } else {
+      showToast('❌ ' + result.message, 'error');
+      if (res.status === 401) {
+        setTimeout(() => window.location.href = window.loginUrl, 1500);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Network error', 'error');
+  } finally {
+    btn.disabled = false;
   }
 }
 
@@ -65,159 +104,102 @@ function openComments(btn) {
 }
 
 // ---- Add comment ----
-function addComment(sendBtn) {
+async function addComment(sendBtn) {
+  if (!window.isLoggedIn) {
+    showToast('⚠️ Please log in to comment', 'warn');
+    setTimeout(() => window.location.href = window.loginUrl, 1500);
+    return;
+  }
+
   const row = sendBtn.closest('.comment-input-row');
+  if (!row) return;
   const input = row.querySelector('.comment-input');
+  if (!input) return;
   const text = input.value.trim();
   if (!text) return;
 
-  const list = sendBtn.closest('.comments-panel').querySelector('.comment-list');
-  const randId = Math.floor(Math.random() * 70) + 1;
+  const postId = sendBtn.getAttribute('data-id');
+  if (!postId) return;
 
-  const commentEl = document.createElement('div');
-  commentEl.className = 'comment';
-  commentEl.innerHTML = `
-    <img src="https://i.pravatar.cc/24?img=${randId}" class="c-avatar" alt="you" />
-    <div>
-      <strong>You</strong>
-      <p>${escapeHtml(text)}</p>
-    </div>
-  `;
+  sendBtn.disabled = true;
+  const originalHtml = sendBtn.innerHTML;
+  sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-  list.appendChild(commentEl);
-  input.value = '';
-
-  // Update comment count
-  const commentBtn = sendBtn.closest('.card-body, .blog-card').querySelector('.comment-btn span');
-  if (commentBtn) commentBtn.textContent = parseInt(commentBtn.textContent) + 1;
-
-  showToast('💬 Comment posted!');
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
-}
-
-// ---- Modal ----
-function openModal(id) {
-  const modal = document.getElementById(id);
-  if (!modal) {
-    console.warn("Modal not found: " + id);
-    return;
-  }
-  modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(id) {
-  const modal = document.getElementById(id);
-  if (!modal) return;
-  modal.classList.add('hidden');
-  document.body.style.overflow = '';
-}
-
-// Close on overlay click
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', function (e) {
-    if (e.target === this) closeModal(this.id);
-  });
-});
-
-// Close on Escape
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id));
-  }
-});
-
-// ---- Upload category selection ----
-function selectCat(btn, cat) {
-  document.querySelectorAll('.cat-option').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  document.getElementById('upload-type').value = cat;
-  const fileGroup = document.getElementById('upload-file-group');
-  const coverGroup = document.getElementById('upload-cover-group');
-  const hint = document.getElementById('upload-file-hint');
-  const fileInput = document.getElementById('file-input');
-  
-  if (cat === 'video') {
-    fileGroup.classList.remove('hidden');
-    coverGroup.classList.add('hidden');
-    hint.textContent = 'Video: MP4, WEBM (Max 100MB)';
-    fileInput.accept = '.mp4,.webm';
-  } else if (cat === 'audio') {
-    fileGroup.classList.remove('hidden');
-    coverGroup.classList.add('hidden');
-    hint.textContent = 'Audio: MP3, WAV, OGG, M4A (Max 20MB)';
-    fileInput.accept = '.mp3,.wav,.ogg,.m4a';
-  } else if (cat === 'text') {
-    fileGroup.classList.add('hidden');
-    coverGroup.classList.remove('hidden');
-  }
-}
-
-// ---- Submit entry ----
-async function submitEntry() {
-  const form = document.getElementById('upload-form');
-  if (!form) return;
-  
-  const title = document.getElementById('upload-title').value.trim();
-  const desc = document.getElementById('upload-description').value.trim();
-  const type = document.getElementById('upload-type').value;
-  const fileInput = document.getElementById('file-input');
-  
-  if (!title) {
-    showToast('⚠️ Title is required.', 'warn');
-    return;
-  }
-  if (type === 'text' && !desc) {
-    showToast('⚠️ Description is required for text posts.', 'warn');
-    return;
-  }
-  if ((type === 'video' || type === 'audio') && fileInput.files.length === 0) {
-    showToast('⚠️ File is required.', 'warn');
-    return;
-  }
-  
-  const btn = document.getElementById('upload-submit-btn');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-  btn.disabled = true;
-  
-  const formData = new FormData(form);
-  
   try {
-    const res = await fetch('api/upload.php', {
+    const res = await fetch('api/comment.php', {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: postId, body: text, csrf_token: window.csrfToken })
     });
     
     let result;
     try {
       result = await res.json();
     } catch (e) {
-      result = { success: false, message: 'Server returned an invalid response.' };
+      console.error(e);
+      showToast('❌ Unexpected server response', 'error');
+      return;
     }
-    
+
     if (result.success) {
-      showToast('🎉 ' + result.message);
-      form.reset();
-      if (result.redirect) {
-        window.location.href = result.redirect;
-      } else {
-        closeModal('upload-modal');
+      const panel = sendBtn.closest('.comments-panel');
+      const list = panel ? panel.querySelector('.comment-list') : null;
+      
+      const cardContainer = sendBtn.closest('.media-card, .blog-card');
+      const cardFooter = cardContainer ? cardContainer.querySelector('.card-footer') : null;
+      const commentCountSpan = cardFooter ? cardFooter.querySelector('.comment-btn .comment-count-text') : null;
+
+      const c = result.comment;
+      
+      if (list) {
+        const commentEl = document.createElement('div');
+        commentEl.className = 'comment';
+        
+        let avatarHtml = '';
+        if (c.avatar) {
+          avatarHtml = `<img src="${c.avatar}" class="c-avatar" alt="avatar" />`;
+        } else {
+          avatarHtml = `<div class="c-avatar" style="background: var(--accent2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; width: 24px; height: 24px; border-radius: 50%;">${c.initials}</div>`;
+        }
+
+        const divBody = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = c.author_name;
+        const p = document.createElement('p');
+        
+        const lines = c.body.split('\n');
+        lines.forEach((line, i) => {
+          p.appendChild(document.createTextNode(line));
+          if (i < lines.length - 1) {
+            p.appendChild(document.createElement('br'));
+          }
+        });
+        
+        divBody.appendChild(strong);
+        divBody.appendChild(p);
+
+        commentEl.innerHTML = avatarHtml;
+        commentEl.appendChild(divBody);
+        list.appendChild(commentEl);
+      }
+      
+      input.value = '';
+      
+      if (commentCountSpan) {
+        commentCountSpan.textContent = result.count;
       }
     } else {
       showToast('❌ ' + result.message, 'error');
+      if (res.status === 401) {
+        setTimeout(() => window.location.href = window.loginUrl, 1500);
+      }
     }
   } catch (err) {
-    showToast('❌ Network error occurred.', 'error');
+    console.error(err);
+    showToast('❌ Network error', 'error');
   } finally {
-    btn.innerHTML = originalText;
-    btn.disabled = false;
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = originalHtml;
   }
 }
 
