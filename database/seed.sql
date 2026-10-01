@@ -38,3 +38,11 @@ INSERT IGNORE INTO competition_entries (competition_id, user_id, post_id) VALUES
 (1, 2, NULL),
 (1, 4, NULL);
 
+
+INSERT INTO points (user_id, competition_id, points, note) VALUES
+(2, 1, 50, 'Excellent choreography and stage presence.'),
+(2, 1, 10, 'Bonus for costume design.'),
+(3, 2, 75, 'Outstanding vocal performance in the finale.'),
+(4, 3, 40, 'Great storytelling and emotional depth.'),
+(4, 3, 20, 'Runner up points for text competition.');
+

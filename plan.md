@@ -192,6 +192,7 @@ Rules:
 - A `.php` file renamed to `.mp4` is rejected.
 
 ### Phase 4 - Likes and comments
+**Status:** Done
 **Tasks**
 - `api/like.php`: toggle like for the logged-in user, return the new count as JSON.
 - `api/comment.php`: add a comment, return the rendered comment data as JSON.
@@ -205,6 +206,7 @@ Rules:
 - Comment text is escaped (no HTML injection).
 
 ### Phase 5 - Competitions
+**Status:** Done
 **Tasks**
 - `competitions.php` loads competitions from MySQL.
 - Category filter (All, Video, Audio, Text) works in JavaScript.
@@ -217,6 +219,7 @@ Rules:
 - Registration appears in the user dashboard (Phase 6).
 
 ### Phase 6 - User dashboard (`dashboard.php`)
+**Status:** Done
 Login required. Uses `dashboard.css` and `dashboard.js`.
 
 **Sections**
