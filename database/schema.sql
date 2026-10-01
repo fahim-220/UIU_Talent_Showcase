@@ -59,7 +59,9 @@ CREATE TABLE competitions (
     title VARCHAR(255) NOT NULL,
     category ENUM('video', 'audio', 'text') NOT NULL,
     description TEXT,
-    deadline DATETIME NOT NULL,
+    deadline DATE NOT NULL
+    start_date DATE NULL,
+    prize VARCHAR(100) NULL,
     status ENUM('open', 'closed') DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

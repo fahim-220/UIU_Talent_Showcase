@@ -1,4 +1,22 @@
 <?php require_once 'includes/auth.php'; ?>
+<?php
+$preview_comp = null;
+if (isset($pdo)) {
+    $stmt = $pdo->prepare("
+        SELECT * FROM competitions 
+        WHERE status = 'open' AND deadline >= CURDATE() 
+        ORDER BY deadline ASC 
+        LIMIT 1
+    ");
+    $stmt->execute();
+    $preview_comp = $stmt->fetch();
+}
+$images = [
+    'video' => 'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=640&h=360&fit=crop&auto=format',
+    'audio' => 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=640&h=360&fit=crop&auto=format',
+    'text' => 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=640&h=360&fit=crop&auto=format',
+];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,9 +94,24 @@
     <section id="competitions" class="competition-preview home-section">
       <div class="section-heading-row"><div><div class="section-kicker"><i class="fas fa-fire"></i> Enter the arena</div><h2>Competitions</h2><p class="section-lead">Prove your talent to the world.</p></div><a class="text-link" href="competitions.php">View all <i class="fas fa-arrow-right"></i></a></div>
       <div class="competition-grid">
-        <article class="competition-card"><img src="https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=640&h=360&fit=crop&auto=format" alt="Dancers performing on stage" /><div class="competition-body"><span class="competition-type">Dance Competition</span><h3>International Dancing Championship 2026</h3><p>Bring your unique dance style to the global stage. Open to every age group and experience level.</p><div class="competition-meta"><span><b>Aug 15</b> Start</span><span><b>Sep 30</b> End</span><span><b>$5,000</b> Prize</span></div><a class="btn-primary" href="competitions.php">Register Now</a></div></article>
-        <article class="competition-card"><img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=640&h=360&fit=crop&auto=format" alt="Actor performing on a stage" /><div class="competition-body"><span class="competition-type">Acting Competition</span><h3>UIU Stage &amp; Screen Acting Awards</h3><p>Perform a monologue, scene, or original piece in front of industry judges.</p><div class="competition-meta"><span><b>Aug 10</b> Start</span><span><b>Sep 30</b> End</span><span><b>$2,500</b> Prize</span></div><a class="btn-primary" href="competitions.php">Register Now</a></div></article>
-        <article class="competition-card"><img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=640&h=360&fit=crop&auto=format" alt="Musician performing with a microphone" /><div class="competition-body"><span class="competition-type">Music Competition</span><h3>UIU Music Fest — Emerging Artists Showcase</h3><p>From acoustic sets to full bands, if it moves you, it will move us.</p><div class="competition-meta"><span><b>Aug 5</b> Start</span><span><b>Oct 1</b> End</span><span><b>$4,000</b> Prize</span></div><a class="btn-primary" href="competitions.php">Register Now</a></div></article>
+        <?php if ($preview_comp): ?>
+          <article class="competition-card">
+            <img src="<?php echo e($images[$preview_comp['category']]); ?>" alt="Competition image" />
+            <div class="competition-body">
+              <span class="competition-type"><?php echo ucfirst(e($preview_comp['category'])); ?> Competition</span>
+              <h3><?php echo e($preview_comp['title']); ?></h3>
+              <p><?php echo substr(e($preview_comp['description']), 0, 100); ?>...</p>
+              <div class="competition-meta">
+                <span><b><?php echo $preview_comp['start_date'] ? date('M j', strtotime($preview_comp['start_date'])) : '-'; ?></b> Start</span>
+                <span><b><?php echo date('M j', strtotime($preview_comp['deadline'])); ?></b> End</span>
+                <span><b><?php echo $preview_comp['prize'] ? e($preview_comp['prize']) : '-'; ?></b> Prize</span>
+              </div>
+              <a class="btn-primary" href="<?php echo BASE_URL; ?>/competitions.php">Register Now</a>
+            </div>
+          </article>
+        <?php else: ?>
+          <p style="color: var(--text3);">No active competitions at the moment. Check back soon!</p>
+        <?php endif; ?>
       </div>
     </section>
 

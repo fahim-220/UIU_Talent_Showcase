@@ -26,3 +26,15 @@ INSERT INTO comments (post_id, user_id, body) VALUES
 (1, 5, 'Great read. Thanks for sharing your journey.'),
 (2, 2, 'Poetry is indeed the language of the soul.'),
 (3, 4, 'Very well said! Music connects us all.');
+
+INSERT INTO competitions (title, category, description, start_date, deadline, prize, status) VALUES
+('International Dancing Championship 2026', 'video', 'Bring your unique dance style to the global stage. Open to every age group and experience level.', '2026-08-15', '2026-11-30', '$5,000', 'open'),
+('UIU Music Fest - Emerging Artists', 'audio', 'From acoustic sets to full bands, if it moves you, it will move us.', '2026-08-05', '2026-11-15', '$4,000', 'open'),
+('UIU Literary Excellence Awards', 'text', 'Submit a short story, poem, personal essay, or flash fiction and compete for recognition.', '2026-09-01', '2026-12-01', '$2,000', 'open'),
+('Lens Masters Video Competition', 'video', 'Capture this year\'s theme, Human Connection, through authentic videos and emotional storytelling.', '2026-08-15', '2026-12-10', '$3,500', 'open'),
+('Past Winter Talent Show', 'video', 'A show for the talents of the past winter. Closed competition.', '2026-01-01', '2026-09-15', '$1,000', 'closed');
+
+INSERT IGNORE INTO competition_entries (competition_id, user_id, post_id) VALUES
+(1, 2, NULL),
+(1, 4, NULL);
+
