@@ -1,11 +1,83 @@
+/* LAYOUT CONTAINERS */
+.dash-layout, .admin-layout {
+  max-width: 1400px;
+  margin: 32px auto 40px; /* 32px space below the sticky navbar */
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
 .dash-layout {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 1200px;
-  margin: 100px auto 40px;
-  padding: 0 20px;
+  gap: 24px;
 }
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start; /* Prevents sidebar from stretching full height */
+}
+
+/* MIN-WIDTH 0 TO PREVENT FLEX/GRID BLOWOUTS */
+.admin-content, .dash-panel, .table-container, .stat-grid, .profile-grid, .lb-history-stack {
+  min-width: 0;
+}
+
+/* SIDEBAR STYLES (Admin) */
+.admin-layout > aside {
+  position: sticky;
+  top: 100px; /* approx navbar height + 32px gap */
+}
+
+.admin-sidebar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.admin-sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-nav-link {
+  display: block;
+  padding: 10px 15px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 400;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.admin-nav-link:hover {
+  background: var(--surface2);
+}
+
+.admin-nav-link.active {
+  color: var(--accent);
+  background: var(--surface2);
+  font-weight: 600;
+}
+
+.admin-nav-divider {
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+.admin-nav-link.back-link {
+  color: var(--text2);
+}
+
+/* DASHBOARD NAVIGATION (User) */
 .dash-nav {
   display: flex;
   gap: 10px;
@@ -44,6 +116,8 @@
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
+
+/* SECTIONS */
 .dash-section {
   display: none;
   animation: fadeIn 0.3s ease;
@@ -51,10 +125,21 @@
 .dash-section.active {
   display: block;
 }
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+/* STAT CARDS */
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
 }
 .stat-card {
   background: var(--card);
@@ -71,17 +156,33 @@
 .stat-card h3 {
   font-size: 32px;
   margin: 10px 0;
+  word-break: break-word;
 }
 .stat-card p {
   color: var(--text3);
   font-size: 14px;
 }
+
+/* PANELS & TWO-COLUMN GRIDS */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.dash-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+/* TABLES */
 .table-container {
   overflow-x: auto;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  max-width: 100%;
+  width: 100%;
 }
 .dash-table {
   width: 100%;
@@ -93,6 +194,10 @@
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
+.dash-table td {
+  word-wrap: break-word;
+  word-break: break-word;
+}
 .dash-table th {
   background: var(--surface2);
   color: var(--text2);
@@ -101,22 +206,8 @@
 .dash-table tr:last-child td {
   border-bottom: none;
 }
-.profile-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-@media (min-width: 768px) {
-  .profile-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.dash-panel {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-}
+
+/* USER PROFILE EXTRAS */
 .avatar-preview-wrapper {
   display: flex;
   align-items: center;
@@ -129,6 +220,7 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);
+  flex-shrink: 0;
 }
 .default-avatar {
   background: var(--accent2);
@@ -143,4 +235,110 @@
   text-align: center;
   padding: 40px 20px;
   color: var(--text3);
+}
+
+/* RESPONSIVE BREAKPOINTS */
+
+/* 1100px: Panels stack */
+@media (max-width: 1100px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 900px: Sidebar becomes horizontal top nav, Stats become 2 columns */
+@media (max-width: 900px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .admin-layout > aside {
+    position: static;
+  }
+  .admin-sidebar-list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+  .admin-sidebar-list::-webkit-scrollbar {
+    height: 4px;
+  }
+  .admin-sidebar-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+  .admin-nav-link {
+    display: inline-block;
+  }
+  .admin-nav-divider {
+    margin-top: 0;
+    border-top: none;
+    border-left: 1px solid var(--border);
+    padding-top: 0;
+    padding-left: 20px;
+    margin-left: 10px;
+  }
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 500px: Stats become 1 column */
+@media (max-width: 500px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-table {
+    min-width: 500px;
+  }
+}
+
+
+.points-badge {
+  display: inline-block;
+  background: rgba(250, 204, 21, 0.15);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* POINTS LEADERBOARD & HISTORY PAGE */
+.lb-history-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+#admin-leaderboard {
+  table-layout: fixed;
+}
+#admin-leaderboard th, #admin-leaderboard td,
+#points-history-table th, #points-history-table td {
+  padding: 14px 16px;
+}
+
+.rank-col { width: 90px; }
+.points-col { width: 140px; }
+
+#points-history-table .col-date,
+#points-history-table .col-user,
+#points-history-table .col-points {
+  white-space: nowrap;
+}
+
+#points-history-table .col-post,
+#points-history-table .col-comp {
+  min-width: 140px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+#points-history-table .col-note {
+  min-width: 200px;
+  white-space: normal;
+  word-break: break-word;
 }

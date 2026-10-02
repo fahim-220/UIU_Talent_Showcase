@@ -82,9 +82,11 @@ CREATE TABLE points (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     competition_id INT DEFAULT NULL,
+    post_id INT DEFAULT NULL,
     points INT NOT NULL,
     note VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (competition_id) REFERENCES competitions(id) ON DELETE CASCADE
+    FOREIGN KEY (competition_id) REFERENCES competitions(id) ON DELETE SET NULL,
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL
 );

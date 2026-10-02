@@ -5,9 +5,10 @@ $stmt = $pdo->prepare("
     SELECT p.*, u.name as author_name, u.avatar,
            (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
            (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count,
-           (SELECT COALESCE(SUM(points), 0) FROM points WHERE user_id = p.user_id) as total_points
+           COALESCE(pp.post_points, 0) as total_points
     FROM posts p
     JOIN users u ON p.user_id = u.id
+    LEFT JOIN (SELECT post_id, SUM(points) as post_points FROM points WHERE post_id IS NOT NULL GROUP BY post_id) pp ON pp.post_id = p.id
     WHERE p.type = ?
     ORDER BY p.created_at DESC
 ");
@@ -103,7 +104,7 @@ if (count($posts) > 0) {
                     </button>
                     <button aria-label="React" class="react-btn comment-btn" onclick="openComments(this)"><i class="far fa-comment"></i> <span class="comment-count-text"><?php echo $post['comment_count']; ?></span></button>
                 </div>
-                <div class="points-badge"><i class="fas fa-star"></i> <span><?php echo $post['total_points']; ?></span> pts</div>
+                <div class="points-badge" title="Points awarded for this post"><i class="fas fa-star"></i> <span><?php echo e($post['total_points']); ?></span> pts</div>
               </div>
               <div class="comments-panel hidden">
                 <div class="comment-list">

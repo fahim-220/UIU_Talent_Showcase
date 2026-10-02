@@ -69,7 +69,8 @@ UIU_Talent_Showcase/
 │   ├── auth.php               # session helpers, require_login(), require_admin()
 │   ├── functions.php          # small helpers (escape, flash messages, file validation)
 │   ├── header.php             # shared navbar
-│   └── footer.php             # shared footer
+│   ├── footer.php             # shared footer
+│   └── admin_nav.php          # shared admin sidebar
 │
 ├── api/                       # small endpoints called with fetch()
 │   ├── like.php
@@ -130,7 +131,7 @@ Database name: `uiu_talent_showcase` (utf8mb4).
 | `comments` | id, post_id, user_id, body, created_at |
 | `competitions` | id, title, category (`video`/`audio`/`text`), description, deadline, status (`open`/`closed`), created_at |
 | `competition_entries` | id, competition_id, user_id, post_id (nullable), created_at. Unique (competition_id, user_id) |
-| `points` | id, user_id, competition_id (nullable), points, note, created_at |
+| `points` | id, user_id, competition_id (nullable), post_id (nullable), points, note, created_at |
 
 Rules:
 - Leaderboard = `SUM(points)` per user, ordered descending.
@@ -235,6 +236,7 @@ Login required. Uses `dashboard.css` and `dashboard.js`.
 - Profile and password changes work.
 
 ### Phase 7 - Admin dashboard (`admin/`)
+**Status:** Done
 Admin role required on every page. Shared admin sidebar. Uses `dashboard.css` and `admin.js`.
 
 **Pages**
@@ -242,11 +244,11 @@ Admin role required on every page. Shared admin sidebar. Uses `dashboard.css` an
 2. **`admin/users.php`:** list all users, search by name/email, block/unblock, delete. Admin cannot block or delete their own account.
 3. **`admin/posts.php`:** list all posts with filter by type, delete any post (also removes the file from `uploads/`).
 4. **`admin/competitions.php`:** create, edit, delete, open/close competitions. View entries per competition.
-5. **`admin/points.php`:** give points to a user for a competition with a note. Replaces the old admin modal. Shows the live leaderboard.
+5. **`admin/points.php`:** Leaderboard & History (read-only); points are awarded and deducted only from Manage Posts.
 
 **Done when**
 - Only admins can open these pages.
-- Points added here immediately change the leaderboard on the home page and Achievers page, in the correct order.
+- Points added here immediately change the leaderboard on the admin Points page (the public pages are connected in Phase 8).
 - Deleting a post removes both the database row and the file.
 
 ### Phase 8 - Final polish and delivery

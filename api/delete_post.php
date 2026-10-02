@@ -81,3 +81,4 @@ send_json_delete([
     'message' => 'Post deleted successfully.',
     'posts' => $remaining
 ]);
+
