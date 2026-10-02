@@ -13,9 +13,23 @@
       </div>
       <div class="footer-links">
         <h5>Follow Us</h5>
-        <a href="javascript:void(0)"><i class="fab fa-facebook"></i> Facebook</a>
-        <a href="javascript:void(0)"><i class="fab fa-instagram"></i> Instagram</a>
-        <a href="javascript:void(0)"><i class="fab fa-youtube"></i> YouTube</a>
+        <?php if (!empty(SOCIAL_FACEBOOK_URL)): ?>
+          <a href="<?php echo e(SOCIAL_FACEBOOK_URL); ?>" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i> Facebook</a>
+        <?php else: ?>
+          <span style="color: var(--text3); display: flex; align-items: center; gap: 8px;"><i class="fab fa-facebook"></i> Facebook</span>
+        <?php endif; ?>
+        
+        <?php if (!empty(SOCIAL_INSTAGRAM_URL)): ?>
+          <a href="<?php echo e(SOCIAL_INSTAGRAM_URL); ?>" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i> Instagram</a>
+        <?php else: ?>
+          <span style="color: var(--text3); display: flex; align-items: center; gap: 8px;"><i class="fab fa-instagram"></i> Instagram</span>
+        <?php endif; ?>
+        
+        <?php if (!empty(SOCIAL_YOUTUBE_URL)): ?>
+          <a href="<?php echo e(SOCIAL_YOUTUBE_URL); ?>" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i> YouTube</a>
+        <?php else: ?>
+          <span style="color: var(--text3); display: flex; align-items: center; gap: 8px;"><i class="fab fa-youtube"></i> YouTube</span>
+        <?php endif; ?>
       </div>
     </div>
     <div class="footer-bottom">

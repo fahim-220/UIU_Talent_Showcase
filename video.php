@@ -50,6 +50,7 @@ if (count($posts) > 0) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Watch amazing video showcases from talented UIU students." />
   <title>Video Entries | UIU Talent Show</title>
   <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css" />
   <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/pages/video.css" />

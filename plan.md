@@ -68,6 +68,7 @@ UIU_Talent_Showcase/
 │   ├── db.php                 # PDO connection
 │   ├── auth.php               # session helpers, require_login(), require_admin()
 │   ├── functions.php          # small helpers (escape, flash messages, file validation)
+│   ├── public_data.php        # leaderboard and site stats logic
 │   ├── header.php             # shared navbar
 │   ├── footer.php             # shared footer
 │   └── admin_nav.php          # shared admin sidebar
@@ -251,7 +252,7 @@ Admin role required on every page. Shared admin sidebar. Uses `dashboard.css` an
 - Points added here immediately change the leaderboard on the admin Points page (the public pages are connected in Phase 8).
 - Deleting a post removes both the database row and the file.
 
-### Phase 8 - Final polish and delivery
+### [Done] Phase 8 - Final polish and delivery
 **Tasks**
 - Connect the home page leaderboard and stats to real database values.
 - Connect Achievers page to the top users query.

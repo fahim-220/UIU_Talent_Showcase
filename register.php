@@ -74,17 +74,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="form-group">
           <label>Full Name</label>
-          <input type="text" name="name" class="form-input" value="<?php echo e($old['name']); ?>" required />
+          <input type="text" name="name" class="form-input" value="<?php echo e($old['name']); ?>" required maxlength="255" />
         </div>
         
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" name="email" class="form-input" value="<?php echo e($old['email']); ?>" required />
+          <input type="email" name="email" class="form-input" value="<?php echo e($old['email']); ?>" required maxlength="255" />
         </div>
 
         <div class="form-group">
           <label>Department (Optional)</label>
-          <input type="text" name="department" class="form-input" value="<?php echo e($old['department']); ?>" />
+          <input type="text" name="department" class="form-input" value="<?php echo e($old['department']); ?>" maxlength="255" />
         </div>
 
         <div class="form-group">

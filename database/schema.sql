@@ -59,9 +59,9 @@ CREATE TABLE competitions (
     title VARCHAR(255) NOT NULL,
     category ENUM('video', 'audio', 'text') NOT NULL,
     description TEXT,
-    deadline DATE NOT NULL
-    start_date DATE NULL,
-    prize VARCHAR(100) NULL,
+    start_date DATE DEFAULT NULL,
+    deadline DATE NOT NULL,
+    prize VARCHAR(100) DEFAULT NULL,
     status ENUM('open', 'closed') DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -87,6 +87,6 @@ CREATE TABLE points (
     note VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (competition_id) REFERENCES competitions(id) ON DELETE SET NULL,
-    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL
+    CONSTRAINT fk_points_competition FOREIGN KEY (competition_id) REFERENCES competitions(id) ON DELETE SET NULL,
+    CONSTRAINT fk_points_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL
 );

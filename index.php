@@ -1,5 +1,9 @@
-<?php require_once 'includes/auth.php'; ?>
-<?php
+<?php 
+require_once 'includes/auth.php';
+require_once 'includes/db.php';
+require_once 'includes/functions.php';
+require_once 'includes/public_data.php'; 
+
 $preview_comp = null;
 if (isset($pdo)) {
     $stmt = $pdo->prepare("
@@ -11,6 +15,9 @@ if (isset($pdo)) {
     $stmt->execute();
     $preview_comp = $stmt->fetch();
 }
+$site_stats = get_site_stats($pdo);
+$leaderboard = get_leaderboard($pdo, 10);
+
 $images = [
     'video' => 'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=640&h=360&fit=crop&auto=format',
     'audio' => 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=640&h=360&fit=crop&auto=format',
@@ -22,6 +29,7 @@ $images = [
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Discover, develop, and display your unique gifts on UIU Talent Hunter." />
   <title>UIU Talent Hunter</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -39,11 +47,11 @@ $images = [
       <h1 class="hero-title">Welcome to a platform<br />built for the <span class="gradient-text">truly talented.</span></h1>
       <p class="hero-subtitle">UIU Talent Hunter helps individuals discover, develop, and display their unique gifts. Showcase your work, compete with peers, learn from leaders, and turn your passion into opportunity.</p>
       <div class="hero-stats">
-        <div class="stat"><span class="stat-num">128</span><span class="stat-label">Talents discovered</span></div>
+        <div class="stat"><span class="stat-num"><?php echo format_count($site_stats['users']); ?>+</span><span class="stat-label">Talents discovered</span></div>
         <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num">347</span><span class="stat-label">Showcases shared</span></div>
+        <div class="stat"><span class="stat-num"><?php echo format_count($site_stats['posts']); ?>+</span><span class="stat-label">Showcases shared</span></div>
         <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num">1.2K</span><span class="stat-label">Community votes</span></div>
+        <div class="stat"><span class="stat-num"><?php echo format_count($site_stats['likes']); ?>+</span><span class="stat-label">Community votes</span></div>
       </div>
       <div class="hero-btns">
         <a href="#competitions" class="btn-primary">Explore Opportunities</a>
@@ -116,7 +124,25 @@ $images = [
     </section>
 
     <section class="community-section home-section">
-      <div class="community-panel achievers-panel"><div class="section-kicker"><i class="fas fa-star"></i> Celebrating excellence</div><h2>Talented Achievers</h2><p class="section-lead">Our leaderboard celebrates excellence across every discipline.</p><a class="text-link" href="achievers.php">Meet the achievers <i class="fas fa-arrow-right"></i></a><div class="person-row"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=220&h=220&fit=crop&auto=format" alt="Arjun Sharma" /><div><strong>Arjun Sharma</strong><span>Photography</span></div><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=220&h=220&fit=crop&auto=format" alt="Priya Nair" /><div><strong>Priya Nair</strong><span>Classical Dance</span></div></div></div>
+      <div class="community-panel achievers-panel"><div class="section-kicker"><i class="fas fa-star"></i> Celebrating excellence</div><h2>Talented Achievers</h2><p class="section-lead">Our leaderboard celebrates excellence across every discipline.</p><a class="text-link" href="achievers.php">Meet the achievers <i class="fas fa-arrow-right"></i></a>
+        <?php if (empty($leaderboard)): ?>
+          <p style="color: var(--text3); margin-top: 20px;">No achievers yet. Be the first!</p>
+        <?php else: ?>
+          <div class="person-row">
+            <?php foreach (array_slice($leaderboard, 0, 2) as $achiever): ?>
+              <?php if (!empty($achiever['avatar'])): ?>
+                <img src="<?php echo e($achiever['avatar']); ?>" alt="<?php echo e($achiever['name']); ?>" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
+              <?php else: ?>
+                <div class="default-avatar" style="width: 50px; height: 50px; border-radius: 50%; font-size: 18px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; background: var(--surface2);"><?php echo initials($achiever['name']); ?></div>
+              <?php endif; ?>
+              <div>
+                <strong><?php echo e($achiever['name']); ?></strong>
+                <span><?php echo $achiever['department'] ? e($achiever['department']) : 'UIU Student'; ?></span>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </div>
       <div class="community-panel supporters-panel"><div class="section-kicker"><i class="fas fa-hand-holding-heart"></i> Backing brilliance</div><h2>Top Supporters</h2><p class="section-lead">The generous people powering talent forward.</p><div class="supporter-list"><div><span>#1</span><strong>Vikram Anand</strong><small>Gold Supporter</small></div><div><span>#2</span><strong>Lena Hoffman</strong><small>Diamond Patron</small></div><div><span>#3</span><strong>Zara Osei</strong><small>Platinum Backer</small></div></div></div>
     </section>
 
@@ -134,137 +160,93 @@ $images = [
       <p>Top talent ranked by audience votes + admin points</p>
     </div>
 
-    <div class="podium">
-      <div class="podium-item second">
-        <img src="https://i.pravatar.cc/60?img=12" class="podium-avatar" alt="2nd" />
-        <div class="podium-name">Priya Sharma</div>
-        <div class="podium-tag">Audio</div>
-        <div class="podium-block">
-          <span class="podium-rank">2nd</span>
-          <span class="podium-pts">155 pts</span>
-        </div>
+    <?php
+    $typeMap = ['video' => ['name' => 'Video', 'class' => 'video-pill'], 'audio' => ['name' => 'Audio', 'class' => 'audio-pill'], 'blog' => ['name' => 'Blog', 'class' => 'blog-pill']];
+    $top3 = array_slice($leaderboard, 0, 3);
+    $others = array_slice($leaderboard, 3);
+    $first = isset($top3[0]) ? $top3[0] : null;
+    $second = isset($top3[1]) ? $top3[1] : null;
+    $third = isset($top3[2]) ? $top3[2] : null;
+    
+    function render_podium($item, $pos, $typeMap) {
+        if (!$item) return '';
+        $classes = [1 => 'first', 2 => 'second', 3 => 'third'];
+        $rankStr = [1 => '1st', 2 => '2nd', 3 => '3rd'];
+        $cls = $classes[$pos];
+        $rStr = $rankStr[$pos];
+        $out = '<div class="podium-item ' . $cls . '">';
+        if ($pos == 1) $out .= '<div class="crown">👑</div>';
+        
+        if (!empty($item['avatar'])) {
+            $out .= '<img src="' . e($item['avatar']) . '" class="podium-avatar" alt="' . $rStr . '" style="object-fit: cover;" />';
+        } else {
+            $out .= '<div class="podium-avatar" style="border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; background: var(--surface2); font-size: 24px; font-weight: 600; color: var(--text);">' . initials($item['name']) . '</div>';
+        }
+        
+        $out .= '<div class="podium-name">' . e($item['name']) . '</div>';
+        $typeStr = isset($typeMap[$item['last_type']]) ? $typeMap[$item['last_type']]['name'] : '-';
+        $out .= '<div class="podium-tag">' . $typeStr . '</div>';
+        $out .= '<div class="podium-block"><span class="podium-rank">' . $rStr . '</span><span class="podium-pts">' . $item['total_points'] . ' pts</span></div>';
+        $out .= '</div>';
+        return $out;
+    }
+    ?>
+    <?php if (empty($leaderboard)): ?>
+      <div style="text-align: center; padding: 40px; color: var(--text3);">No leaderboard data yet. Keep participating!</div>
+    <?php else: ?>
+      <div class="podium">
+        <?php echo render_podium($second, 2, $typeMap); ?>
+        <?php echo render_podium($first, 1, $typeMap); ?>
+        <?php echo render_podium($third, 3, $typeMap); ?>
       </div>
-      <div class="podium-item first">
-        <div class="crown">👑</div>
-        <img src="https://i.pravatar.cc/70?img=45" class="podium-avatar" alt="1st" />
-        <div class="podium-name">Omar Faruq</div>
-        <div class="podium-tag">Blog</div>
-        <div class="podium-block">
-          <span class="podium-rank">1st</span>
-          <span class="podium-pts">275 pts</span>
-        </div>
+  
+      <div class="leaderboard-table-wrap">
+        <table class="leaderboard-table" id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Participant</th>
+              <th>Category</th>
+              <th>Likes</th>
+              <th>Comments</th>
+              <th>Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($leaderboard as $idx => $user): 
+                $rankCls = '';
+                $badgeCls = '';
+                if ($user['rank'] == 1) { $rankCls = 'rank-1'; $badgeCls = 'gold'; }
+                elseif ($user['rank'] == 2) { $rankCls = 'rank-2'; $badgeCls = 'silver'; }
+                elseif ($user['rank'] == 3) { $rankCls = 'rank-3'; $badgeCls = 'bronze'; }
+            ?>
+            <tr class="<?php echo $rankCls; ?>">
+              <td><span class="rank-badge <?php echo $badgeCls; ?>"><?php echo $user['rank']; ?></span></td>
+              <td>
+                <?php if (!empty($user['avatar'])): ?>
+                  <img src="<?php echo e($user['avatar']); ?>" class="t-avatar" alt="avatar" style="object-fit: cover;" />
+                <?php else: ?>
+                  <div class="t-avatar" style="border: 2px solid var(--border); display: inline-flex; align-items: center; justify-content: center; background: var(--surface2); font-size: 10px; font-weight: 600; color: var(--text); vertical-align: middle; border-radius: 50%;"><?php echo initials($user['name']); ?></div>
+                <?php endif; ?>
+                <?php echo e($user['name']); ?>
+              </td>
+              <td>
+                <?php if (isset($typeMap[$user['last_type']])): ?>
+                  <span class="cat-pill <?php echo $typeMap[$user['last_type']]['class']; ?>"><?php echo $typeMap[$user['last_type']]['name']; ?></span>
+                <?php else: ?>
+                  -
+                <?php endif; ?>
+              </td>
+              <td><?php echo $user['likes_received']; ?></td>
+              <td><?php echo $user['comments_received']; ?></td>
+              <td><strong class="total-pts"><?php echo $user['total_points']; ?></strong></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
       </div>
-      <div class="podium-item third">
-        <img src="https://i.pravatar.cc/60?img=40" class="podium-avatar" alt="3rd" />
-        <div class="podium-name">Nusrat Jahan</div>
-        <div class="podium-tag">Blog</div>
-        <div class="podium-block">
-          <span class="podium-rank">3rd</span>
-          <span class="podium-pts">220 pts</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="leaderboard-table-wrap">
-      <table class="leaderboard-table" id="leaderboard-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Participant</th>
-            <th>Category</th>
-            <th>Likes</th>
-            <th>Comments</th>
-            <th>Admin Pts</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="rank-1">
-            <td><span class="rank-badge gold">1</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=40" class="t-avatar" alt="avatar" /> Omar Faruq</td>
-            <td><span class="cat-pill blog-pill">Blog</span></td>
-            <td>115</td>
-            <td>47</td>
-            <td><span class="admin-pts" id="ap-omar">113</span></td>
-            <td><strong class="total-pts">275</strong></td>
-          </tr>
-          <tr class="rank-2">
-            <td><span class="rank-badge silver">2</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=12" class="t-avatar" alt="avatar" /> Priya Sharma</td>
-            <td><span class="cat-pill audio-pill">Audio</span></td>
-            <td>62</td>
-            <td>21</td>
-            <td><span class="admin-pts" id="ap-priya">72</span></td>
-            <td><strong class="total-pts">155</strong></td>
-          </tr>
-          <tr class="rank-3">
-            <td><span class="rank-badge bronze">3</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=33" class="t-avatar" alt="avatar" /> Nusrat Jahan</td>
-            <td><span class="cat-pill blog-pill">Blog</span></td>
-            <td>88</td>
-            <td>34</td>
-            <td><span class="admin-pts" id="ap-nusrat">98</span></td>
-            <td><strong class="total-pts">220</strong></td>
-          </tr>
-          <tr>
-            <td><span class="rank-badge">4</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=25" class="t-avatar" alt="avatar" /> Sabrina Islam</td>
-            <td><span class="cat-pill audio-pill">Audio</span></td>
-            <td>79</td>
-            <td>30</td>
-            <td><span class="admin-pts" id="ap-sabrina">91</span></td>
-            <td><strong class="total-pts">200</strong></td>
-          </tr>
-          <tr>
-            <td><span class="rank-badge">5</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=9" class="t-avatar" alt="avatar" /> Mehedi Khan</td>
-            <td><span class="cat-pill video-pill">Video</span></td>
-            <td>56</td>
-            <td>19</td>
-            <td><span class="admin-pts" id="ap-mehedi">65</span></td>
-            <td><strong class="total-pts">140</strong></td>
-          </tr>
-          <tr>
-            <td><span class="rank-badge">6</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=45" class="t-avatar" alt="avatar" /> Zara Ahmed</td>
-            <td><span class="cat-pill blog-pill">Blog</span></td>
-            <td>73</td>
-            <td>28</td>
-            <td><span class="admin-pts" id="ap-zara">84</span></td>
-            <td><strong class="total-pts">185</strong></td>
-          </tr>
-          <tr>
-            <td><span class="rank-badge">7</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=5" class="t-avatar" alt="avatar" /> Tanvir Hossain</td>
-            <td><span class="cat-pill video-pill">Video</span></td>
-            <td>41</td>
-            <td>13</td>
-            <td><span class="admin-pts" id="ap-tanvir">56</span></td>
-            <td><strong class="total-pts">110</strong></td>
-          </tr>
-          <tr>
-            <td><span class="rank-badge">8</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=20" class="t-avatar" alt="avatar" /> Farhan Uddin</td>
-            <td><span class="cat-pill audio-pill">Audio</span></td>
-            <td>38</td>
-            <td>11</td>
-            <td><span class="admin-pts" id="ap-farhan">46</span></td>
-            <td><strong class="total-pts">95</strong></td>
-          </tr>
-          <tr>
-            <td><span class="rank-badge">9</span></td>
-            <td><img src="https://i.pravatar.cc/28?img=1" class="t-avatar" alt="avatar" /> Ayesha Rahman</td>
-            <td><span class="cat-pill video-pill">Video</span></td>
-            <td>24</td>
-            <td>8</td>
-            <td><span class="admin-pts" id="ap-ayesha">53</span></td>
-            <td><strong class="total-pts">85</strong></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <?php endif; ?>
   </section>
-
   <?php include "includes/footer.php"; ?>
 
   
